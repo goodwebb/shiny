@@ -49,22 +49,34 @@ shinyServer(function(input, output) {
     ##tempDate1<-timeNthNdayInMonth("2017-03-01", 5, 3)
     url   <- "http://app2.atmovies.com.tw/boxoffice/twweekend/jjjj/"
     url<-sub("jjjj",replacement =tempdate1,url)
-    read_html(url)
-    
+    ##加入除錯機制
+    tryCatch({
+      read_html(url)
+    }, warning = function(w) {
+      
+    }, error = function(e) {
+      
+    })
   })
   ##統計時間
   date1<-reactive({
     doc<-code()  
     date1 <- "//*[@class='boDate']"
-    xml_text(xml_find_all(doc, date1))
-    
+    if(!is.null(doc)){
+      xml_text(xml_find_all(doc, date1))
+    }else{
+      ""
+    }
   })
   ##資料明細
   selected1 <- reactive({
+    doc<-NULL
     doc<-code()
-    xpathmoviename <- "//*[@id='main']//table[2]//td[2]"
-    moviename<-xml_text(xml_find_all(doc, xpathmoviename))
-    if(length(moviename)!=0){
+    
+    if(!is.null(doc)){ 
+      xpathmoviename <- "//*[@id='main']//table[2]//td[2]"
+      moviename<-xml_text(xml_find_all(doc, xpathmoviename))
+      
       moviename<-moviename[(1:20)*2-1]
       ##本周票房
       xpathmoviemoney <- "//*[@id='main']//table[2]//td[3]"
